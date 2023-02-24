@@ -1,9 +1,10 @@
 import pneumonia_detection
-import tensorflow as tf
+import numpy as np
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from keras.utils import set_random_seed
 from keras.callbacks import EarlyStopping
+from keras.metrics import TruePositives, TrueNegatives, FalsePositives, FalseNegatives
 
 # set random seed for reproducibility
 set_random_seed(1234)
@@ -14,7 +15,7 @@ target_size = (64, 64)
 # use various parameters to augment training data
 print('Training data:')
 train_set = pneumonia_detection.preprocessing('train', target_size, rescale=1/255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True, 
-                                            rotation_range=40, width_shift_range=0.2, height_shift_range=0.2)
+                                                rotation_range=40, width_shift_range=0.2, height_shift_range=0.2)
 print('Validation data:')
 val_set = pneumonia_detection.preprocessing('val', target_size, rescale=1/255)
 print('Testing data:')
@@ -48,17 +49,19 @@ model.summary()
 
 ## Train the model
 print('''\nLet's train the model''')
-# use Adam (A Method for Stochastic Optimization) optimizer (combines RMSprop and AdaGrad),
-# binary cross entropy as the error of the classification because of two classes
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# use Adam (A Method for Stochastic Optimization; combines RMSprop and AdaGrad) as the optimizer and
+# binary cross entropy as the error of the classification (because of two classes)
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy', TruePositives(), TrueNegatives(), FalsePositives(), FalseNegatives()])
 # monitor validation loss and stop training when increment observed; restore weights from the end of the best epoch
 earlystopping = EarlyStopping(monitor ="val_loss", mode ="min", patience = 5, restore_best_weights = True, verbose=2)
 model_train = model.fit(train_set, epochs=20, validation_data=val_set, callbacks =[earlystopping], verbose=2)
 
 ## Test the model
 print('\nNow test the model')
-test_score = model.evaluate(test_set, verbose=1)
-print('Test accuracy:', test_score[1])
+loss, acc, tp, tn, fp, fn = model.evaluate(test_set, verbose=1)
+sens = tp/(tp+fn)
+spec = tn/(tn+fp)
+print('Test accuracy: %.3f, sensitivity: %.3f, specificity: %.3f' % (acc, sens, spec))
 
 ## Plot few images for visual inspection
 # pneumonia_detection.show_imgs(10)
