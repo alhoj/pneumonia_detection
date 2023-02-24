@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from glob import glob
 from keras.preprocessing.image import ImageDataGenerator
 
-path_in = 'C:/Users/Jussi/Documents/python/chest_xray'
+path_in = './chest_xray'
 dir_train = '%s/train/' % path_in
 dir_test = '%s/test/' % path_in
 dir_val = '%s/val/' % path_in
@@ -39,16 +39,16 @@ def show_imgs(n_imgs):
 
 def preprocessing(dataset, target_size, **kwargs):
     """
-        Preprocess data (i.e., generate batches of tensor image data with real-time data augmentation)
-        See https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/ImageDataGenerator for additional parameters (**kwargs)
-        
-        Parameters
-        ----------
-        dataset : str
-            Dataset to use. Options are 'train' (training data), 'test' (testing data), and 'val' (validation data)
-        **kwargs : dict
-            Keyword arguments that are forwarded to ImageDataGenerator
-        """
+    Preprocess data (i.e., generate batches of tensor image data with real-time data augmentation)
+    See https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/image/ImageDataGenerator for additional parameters (**kwargs)
+    
+    Parameters
+    ----------
+    dataset : str
+        Dataset to use. Options are 'train' (training data), 'test' (testing data), and 'val' (validation data)
+    **kwargs : dict
+        Keyword arguments that are forwarded to ImageDataGenerator
+    """
     datagen = ImageDataGenerator(**kwargs)
     match dataset:
         case 'train':
